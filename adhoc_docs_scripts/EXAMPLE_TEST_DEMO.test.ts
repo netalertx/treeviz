@@ -1,9 +1,9 @@
 /**
  * EXAMPLE TEST DEMO - Understanding Treeviz Testing
- * 
+ *
  * This file demonstrates how to write tests for Treeviz.
  * Copy patterns from here to create your own tests.
- * 
+ *
  * Run with: npm run test:run -- EXAMPLE_TEST_DEMO.test.ts
  */
 

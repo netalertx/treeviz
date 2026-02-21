@@ -4,7 +4,7 @@
 
 The `EXAMPLE_TEST_DEMO.test.ts` file contains real-world examples organized in 5 sections:
 
-### 1. **Organization Chart** 
+### 1. **Organization Chart**
 Real data: CEO → CTO → Dev Lead → Frontend/Backend Devs
 - Tests coordinate positioning
 - Shows horizontal layout configuration
@@ -17,7 +17,7 @@ Three different data structures:
 
 ### 3. **Layout Configurations**
 - Horizontal layout
-- Vertical layout  
+- Vertical layout
 - Auto-spacing for responsive design
 
 ### 4. **GitHub Repository Structure**

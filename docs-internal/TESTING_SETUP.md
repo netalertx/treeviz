@@ -39,7 +39,7 @@ tests/
 ### 5. Key Testing Patterns Used
 
 1. **Unit Tests**: Pure function testing with mocked dependencies
-2. **DOM Testing**: jsdom for container/SVG element validation  
+2. **DOM Testing**: jsdom for container/SVG element validation
 3. **Error Scenarios**: Thrown errors and edge cases
 4. **Configuration Validation**: Ensures config objects are properly formed
 5. **Data Structure Testing**: Verifies flat/nested data handling
@@ -53,17 +53,17 @@ tests/
 
 ## Testing Best Practices Applied
 
-✅ Tests are organized by concern (unit vs integration)  
-✅ Clear, descriptive test names (BDD style)  
-✅ Reusable mock data and configurations  
-✅ Proper setup/teardown (beforeEach/afterEach)  
-✅ Fast execution (no external dependencies)  
-✅ TypeScript support throughout  
+✅ Tests are organized by concern (unit vs integration)
+✅ Clear, descriptive test names (BDD style)
+✅ Reusable mock data and configurations
+✅ Proper setup/teardown (beforeEach/afterEach)
+✅ Fast execution (no external dependencies)
+✅ TypeScript support throughout
 
 ## Files Modified
 
 1. **package.json** - Added test scripts and dev dependencies
-2. **.gitignore** - Added coverage/ and test-results/ exclusions  
+2. **.gitignore** - Added coverage/ and test-results/ exclusions
 3. **README.md** - Added Testing section with usage and structure
 4. **vitest.config.ts** - New configuration file
 5. **tests/** - New folder with 5 test files (47 tests total)

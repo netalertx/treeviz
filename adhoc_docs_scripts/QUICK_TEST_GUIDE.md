@@ -25,14 +25,14 @@ npm run test:ui
 ### Unit Tests (tests/unit/)
 - ✅ **utils.test.ts** (5 tests)
   - Tests for `setNodeLocation()` with various orientations
-  
+
 - ✅ **core-utils.test.ts** (11 tests)
   - Tests for `getAreaSize()` (valid/invalid containers)
   - Tests for `RefreshQueue` class (async queue management)
-  
+
 - ✅ **node-ancestors.test.ts** (6 tests)
   - Tests for `getFirstDisplayedAncestor()` hierarchy traversal
-  
+
 - ✅ **prepare-data.test.ts** (6 tests)
   - Tests for configuration validation
   - Tests for data preparation options
@@ -48,12 +48,12 @@ npm run test:ui
 
 ## Key Features
 
-✅ TypeScript support throughout  
-✅ jsdom for browser DOM simulation  
-✅ Code coverage reporting (v8)  
-✅ Interactive UI dashboard  
-✅ Fast execution (no external dependencies)  
-✅ Clear BDD-style test names  
+✅ TypeScript support throughout
+✅ jsdom for browser DOM simulation
+✅ Code coverage reporting (v8)
+✅ Interactive UI dashboard
+✅ Fast execution (no external dependencies)
+✅ Clear BDD-style test names
 
 ## Example: Run Tests
 

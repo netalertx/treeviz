@@ -28,7 +28,7 @@ npm run test:coverage
 
 ✅ **Family Tree Examples**
 - Simple linear trees (3 generations)
-- Wide trees (1 parent, 5 siblings)  
+- Wide trees (1 parent, 5 siblings)
 - Deep trees (5 generations)
 
 ✅ **Layout Configurations**

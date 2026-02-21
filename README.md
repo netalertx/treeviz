@@ -201,10 +201,10 @@ var myTree = Treeviz.create({
   relationnalField: "father",
   linkLabel: {
     render: (parent, child) => {
-      // Return text or HTML to display on the connection line
+      // Return plain text to display on the connection line
       return "is child";
-      // or with HTML:
-      // return "<tspan><strong>reports to</strong></tspan>";
+      // You can use parent and child data for dynamic labels:
+      // return child.data.name + " is child";
     },
     color: "#455A64",      // Label text color (optional)
     fontSize: 11           // Label font size in px (optional)
@@ -212,7 +212,7 @@ var myTree = Treeviz.create({
 });
 ```
 
-The `render` function receives parent and child `NodeData` objects, allowing you to create dynamic labels based on node properties.
+The `render` function receives parent and child `NodeData` objects, allowing you to create dynamic labels based on node properties. Returns plain text only (HTML is not supported in SVG text elements).
 
 ## Testing
 

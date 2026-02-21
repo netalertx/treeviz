@@ -199,28 +199,6 @@ var toggle = true;
 const addButton = document.querySelector("#add") as HTMLButtonElement | null;
 const removeButton = document.querySelector("#remove") as HTMLButtonElement | null;
 const doTasksButton = document.querySelector("#doTasks") as HTMLButtonElement | null;
-addButton?.addEventListener("click", function () {
-  console.log("addButton clicked");
-  toggle ? myTree.refresh(data_2) : myTree.refresh(data_3);
-  toggle = false;
-});
-removeButton?.addEventListener("click", function () {
-  console.log("removeButton clicked");
-  myTree.refresh(data_1);
-});
-doTasksButton?.addEventListener("click", function () {
-  addButton?.click();
-  removeButton?.click();
-  addButton?.click();
-  removeButton?.click();
-  removeButton?.click();
-  addButton?.click();
-  removeButton?.click();
-  addButton?.click();
-  addButton?.click();
-  removeButton?.click();
-  removeButton?.click();
-});
 
 // Horizontal layout example with link labels
 var horizontalTree = Treeviz.create({
@@ -267,3 +245,28 @@ var horizontalTree = Treeviz.create({
   },
 });
 horizontalTree.refresh(data_1);
+
+addButton?.addEventListener("click", function () {
+  console.log("addButton clicked");
+  toggle ? myTree.refresh(data_2) : myTree.refresh(data_3);
+  toggle ? horizontalTree.refresh(data_2) : horizontalTree.refresh(data_3);
+  toggle = false;
+});
+removeButton?.addEventListener("click", function () {
+  console.log("removeButton clicked");
+  myTree.refresh(data_1);
+  horizontalTree.refresh(data_1);
+});
+doTasksButton?.addEventListener("click", function () {
+  addButton?.click();
+  removeButton?.click();
+  addButton?.click();
+  removeButton?.click();
+  removeButton?.click();
+  addButton?.click();
+  removeButton?.click();
+  addButton?.click();
+  addButton?.click();
+  removeButton?.click();
+  removeButton?.click();
+});

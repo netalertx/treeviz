@@ -1,41 +1,23 @@
-import { select } from "d3-selection";
 import { generateLinkLayout } from "./draw-links";
-const processLabelNode = (node, textElement) => {
-    if (node.nodeType === 3) { // Text node
-        const text = node.textContent?.trim();
-        if (text) {
-            textElement.append("tspan").text(text);
-        }
-    }
-    else if (node.nodeType === 1) { // Element node
-        if (node.tagName === "TSPAN" || node.tagName === "tspan") {
-            const tspan = textElement.append("tspan").text(node.textContent?.trim() || "");
-            if (node.getAttribute("dy")) {
-                tspan.attr("dy", node.getAttribute("dy"));
-            }
-        }
-        else if (node.tagName === "STRONG" || node.tagName === "strong") {
-            textElement.append("tspan").attr("font-weight", "bold").text(node.textContent?.trim() || "");
-        }
-        else if (node.tagName === "I" || node.tagName === "i") {
-            textElement.append("tspan").attr("font-style", "italic").text(node.textContent?.trim() || "");
-        }
-        else {
-            for (let i = 0; i < node.childNodes.length; i++) {
-                processLabelNode(node.childNodes[i], textElement);
-            }
-        }
-    }
-};
 const getLabelOffset = (linkShape, isHorizontal) => {
     // For quadraticBeziers, the curve bulges outward, so we need to offset the label
-    // to position it closer to where the actual curve is
     if (linkShape === "quadraticBeziers") {
-        // For horizontal layout, offset on perpendicular axis
-        // For vertical layout, offset on perpendicular axis
-        return isHorizontal ? 0 : 20; // Adjust label position perpendicular to main axis
+        return isHorizontal ? 0 : 20;
     }
     return 0;
+};
+const getScreenPosition = (svgX, svgY, svgElement, transformGroup) => {
+    // Create a point in SVG coordinate space
+    const pt = svgElement.createSVGPoint();
+    pt.x = svgX;
+    pt.y = svgY;
+    // Get the cumulative transform from the main group
+    const matrix = transformGroup.getScreenCTM();
+    if (matrix) {
+        const screenPt = pt.matrixTransform(matrix);
+        return { x: screenPt.x, y: screenPt.y };
+    }
+    return { x: svgX, y: svgY };
 };
 export const drawLinkUpdate = (linkEnter, link, settings) => {
     const linkUpdate = linkEnter.merge(link);
@@ -55,53 +37,60 @@ export const drawLinkUpdate = (linkEnter, link, settings) => {
     });
     // Add/update link labels if configured
     if (settings.linkLabel) {
-        const labelsGroup = linkUpdate.node()?.parentNode;
-        const d3Selection = select(labelsGroup);
-        // Bind label data to links
-        const labels = d3Selection
-            .selectAll("text.link-label")
-            .data(linkUpdate.data(), (_d, i) => `link-label-${i}`);
-        // Remove old labels
-        labels.exit().remove();
-        // Enter new labels
-        const labelsEnter = labels
-            .enter()
-            .append("text")
-            .attr("class", "link-label")
-            .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "middle")
-            .attr("fill", settings.linkLabel.color || "#000000")
-            .attr("font-size", settings.linkLabel.fontSize || 12)
-            .attr("pointer-events", "none")
-            .attr("opacity", 0); // Start invisible for fade-in
-        // Update all labels
-        labelsEnter.merge(labels)
-            .attr("x", function (d) {
+        // Get the SVG and main transform group
+        const svgElement = linkUpdate.node()?.ownerSVGElement;
+        const mainG = linkUpdate.node()?.parentElement?.parentElement;
+        if (!svgElement || !mainG)
+            return;
+        // Get or create labels container div
+        let labelsContainer = document.querySelector(".treeviz-labels-container");
+        if (!labelsContainer) {
+            labelsContainer = document.createElement("div");
+            labelsContainer.className = "treeviz-labels-container";
+            labelsContainer.style.position = "fixed";
+            labelsContainer.style.top = "0";
+            labelsContainer.style.left = "0";
+            labelsContainer.style.pointerEvents = "none";
+            document.body.appendChild(labelsContainer);
+        }
+        // Data join for labels
+        const labelElements = labelsContainer.querySelectorAll(".link-label");
+        const data = linkUpdate.data();
+        // Remove extra labels
+        for (let i = data.length; i < labelElements.length; i++) {
+            labelElements[i].remove();
+        }
+        // Update/create labels
+        data.forEach((d, i) => {
+            // Calculate position in SVG space
             const offset = getLabelOffset(settings.linkShape || "quadraticBeziers", settings.isHorizontal);
+            let svgX, svgY;
             if (settings.isHorizontal) {
-                // For horizontal, adjust x to center on the curve
-                return d.parent.y + (d.y - d.parent.y) - settings.nodeWidth / 4 + offset;
+                svgX = d.parent.y + (d.y - d.parent.y) - settings.nodeWidth / 4 + offset;
+                svgY = d.parent.x + (d.x - d.parent.x) + settings.nodeHeight / 2;
             }
             else {
-                return d.parent.x + (d.x - d.parent.x) + settings.nodeWidth / 2;
+                svgX = d.parent.x + (d.x - d.parent.x) + settings.nodeWidth / 2;
+                svgY = d.parent.y + (d.y - d.parent.y) - settings.nodeHeight / 2 + offset;
             }
-        })
-            .attr("y", function (d) {
-            // Position closer to child node (75% of the way)
-            const offset = getLabelOffset(settings.linkShape || "quadraticBeziers", settings.isHorizontal);
-            if (settings.isHorizontal) {
-                return d.parent.x + (d.x - d.parent.x) + settings.nodeHeight / 2;
+            // Convert to screen coordinates
+            const screenPos = getScreenPosition(svgX, svgY, svgElement, mainG);
+            // Get or create label element
+            let labelEl = labelElements[i];
+            if (!labelEl) {
+                labelEl = document.createElement("div");
+                labelEl.className = "link-label";
+                labelEl.style.position = "absolute";
+                labelEl.style.transform = "translate(-50%, -50%)";
+                labelEl.style.whiteSpace = "nowrap";
+                labelEl.style.pointerEvents = "none";
+                labelEl.style.opacity = "0";
+                labelEl.style.transition = `opacity 300ms ease-in-out`;
+                labelEl.style.color = settings.linkLabel.color || "#000000";
+                labelEl.style.fontSize = (settings.linkLabel.fontSize || 12) + "px";
+                labelsContainer.appendChild(labelEl);
             }
-            else {
-                // For vertical, adjust y to center on the curve
-                return d.parent.y + (d.y - d.parent.y) - settings.nodeHeight / 2 + offset;
-            }
-        })
-            .text("") // Clear existing content
-            .each(function (d) {
-            // Clear any existing tspans
-            select(this).selectAll("tspan").remove();
-            // Render the label text - parent is the source, d is the child/target
+            // Render label content
             const parentNodeData = {
                 ...d.parent,
                 data: d.parent.data,
@@ -113,25 +102,15 @@ export const drawLinkUpdate = (linkEnter, link, settings) => {
                 settings: settings,
             };
             const result = settings.linkLabel.render(parentNodeData, childNodeData);
-            // Get the text element
-            const textElement = select(this);
-            // Check if result contains HTML/tspan markup
-            if (result.includes("<tspan") || result.includes("<strong") || result.includes("<i>")) {
-                // Parse HTML-like content and create tspan elements
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(`<root>${result}</root>`, "text/xml");
-                processLabelNode(xmlDoc.documentElement, textElement);
-            }
-            else {
-                // Plain text - just add it directly
-                textElement.text(result);
-            }
-        })
-            //@ts-ignore
-            .transition()
-            .delay(settings.duration) // Wait for link animation to finish
-            .duration(300) // Fade-in duration
-            .attr("opacity", 1); // Fade in to visible
+            labelEl.innerHTML = result;
+            // Position and animate
+            labelEl.style.left = screenPos.x + "px";
+            labelEl.style.top = screenPos.y + "px";
+            // Delay fade-in after link animation
+            setTimeout(() => {
+                labelEl.style.opacity = "1";
+            }, settings.duration);
+        });
     }
 };
 //# sourceMappingURL=link-update.js.map

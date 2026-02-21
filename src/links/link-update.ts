@@ -3,30 +3,6 @@ import { Selection, select } from "d3-selection";
 import { ITreeConfig, NodeData } from "../typings";
 import { generateLinkLayout } from "./draw-links";
 
-const processLabelNode = (node: any, textElement: any) => {
-  if (node.nodeType === 3) {  // Text node
-    const text = node.textContent?.trim();
-    if (text) {
-      textElement.append("tspan").text(text);
-    }
-  } else if (node.nodeType === 1) {  // Element node
-    if (node.tagName === "TSPAN" || node.tagName === "tspan") {
-      const tspan = textElement.append("tspan").text(node.textContent?.trim() || "");
-      if (node.getAttribute("dy")) {
-        tspan.attr("dy", node.getAttribute("dy"));
-      }
-    } else if (node.tagName === "STRONG" || node.tagName === "strong") {
-      textElement.append("tspan").attr("font-weight", "bold").text(node.textContent?.trim() || "");
-    } else if (node.tagName === "I" || node.tagName === "i") {
-      textElement.append("tspan").attr("font-style", "italic").text(node.textContent?.trim() || "");
-    } else {
-      for (let i = 0; i < node.childNodes.length; i++) {
-        processLabelNode(node.childNodes[i], textElement);
-      }
-    }
-  }
-};
-
 const getLabelOffset = (linkShape: string, isHorizontal: boolean) => {
   // For quadraticBeziers, the curve bulges outward, so we need to offset the label
   // to position it closer to where the actual curve is
@@ -108,9 +84,6 @@ export const drawLinkUpdate = <T>(
       })
       .text("")  // Clear existing content
       .each(function (d: any) {
-        // Clear any existing tspans
-        select(this).selectAll("tspan").remove();
-
         // Render the label text - parent is the source, d is the child/target
         const parentNodeData: NodeData<T> = {
           ...d.parent,
@@ -123,20 +96,9 @@ export const drawLinkUpdate = <T>(
           settings: settings,
         };
         const result = settings.linkLabel!.render(parentNodeData, childNodeData);
-
-        // Get the text element
-        const textElement = select(this);
-
-        // Check if result contains HTML/tspan markup
-        if (result.includes("<tspan") || result.includes("<strong") || result.includes("<i>")) {
-          // Parse HTML-like content and create tspan elements
-          const parser = new DOMParser();
-          const xmlDoc = parser.parseFromString(`<root>${result}</root>`, "text/xml");
-          processLabelNode(xmlDoc.documentElement, textElement);
-        } else {
-          // Plain text - just add it directly
-          textElement.text(result);
-        }
+        
+        // Set plain text label
+        select(this).text(result);
       })
       //@ts-ignore
       .transition()

@@ -110,7 +110,7 @@ export const drawLinkUpdate = <T>(
       .each(function (d: any) {
         // Clear any existing tspans
         select(this).selectAll("tspan").remove();
-        
+
         // Render the label text - parent is the source, d is the child/target
         const parentNodeData: NodeData<T> = {
           ...d.parent,
@@ -123,10 +123,10 @@ export const drawLinkUpdate = <T>(
           settings: settings,
         };
         const result = settings.linkLabel!.render(parentNodeData, childNodeData);
-        
+
         // Get the text element
         const textElement = select(this);
-        
+
         // Check if result contains HTML/tspan markup
         if (result.includes("<tspan") || result.includes("<strong") || result.includes("<i>")) {
           // Parse HTML-like content and create tspan elements

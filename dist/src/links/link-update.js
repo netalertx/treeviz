@@ -1,5 +1,42 @@
 import { select } from "d3-selection";
 import { generateLinkLayout } from "./draw-links";
+const processLabelNode = (node, textElement) => {
+    if (node.nodeType === 3) { // Text node
+        const text = node.textContent?.trim();
+        if (text) {
+            textElement.append("tspan").text(text);
+        }
+    }
+    else if (node.nodeType === 1) { // Element node
+        if (node.tagName === "TSPAN" || node.tagName === "tspan") {
+            const tspan = textElement.append("tspan").text(node.textContent?.trim() || "");
+            if (node.getAttribute("dy")) {
+                tspan.attr("dy", node.getAttribute("dy"));
+            }
+        }
+        else if (node.tagName === "STRONG" || node.tagName === "strong") {
+            textElement.append("tspan").attr("font-weight", "bold").text(node.textContent?.trim() || "");
+        }
+        else if (node.tagName === "I" || node.tagName === "i") {
+            textElement.append("tspan").attr("font-style", "italic").text(node.textContent?.trim() || "");
+        }
+        else {
+            for (let i = 0; i < node.childNodes.length; i++) {
+                processLabelNode(node.childNodes[i], textElement);
+            }
+        }
+    }
+};
+const getLabelOffset = (linkShape, isHorizontal) => {
+    // For quadraticBeziers, the curve bulges outward, so we need to offset the label
+    // to position it closer to where the actual curve is
+    if (linkShape === "quadraticBeziers") {
+        // For horizontal layout, offset on perpendicular axis
+        // For vertical layout, offset on perpendicular axis
+        return isHorizontal ? 0 : 20; // Adjust label position perpendicular to main axis
+    }
+    return 0;
+};
 export const drawLinkUpdate = (linkEnter, link, settings) => {
     const linkUpdate = linkEnter.merge(link);
     linkUpdate
@@ -35,12 +72,15 @@ export const drawLinkUpdate = (linkEnter, link, settings) => {
             .attr("dominant-baseline", "middle")
             .attr("fill", settings.linkLabel.color || "#000000")
             .attr("font-size", settings.linkLabel.fontSize || 12)
-            .attr("pointer-events", "none");
+            .attr("pointer-events", "none")
+            .attr("opacity", 0); // Start invisible for fade-in
         // Update all labels
         labelsEnter.merge(labels)
             .attr("x", function (d) {
+            const offset = getLabelOffset(settings.linkShape || "quadraticBeziers", settings.isHorizontal);
             if (settings.isHorizontal) {
-                return d.parent.y + (d.y - d.parent.y) - settings.nodeWidth / 4;
+                // For horizontal, adjust x to center on the curve
+                return d.parent.y + (d.y - d.parent.y) - settings.nodeWidth / 4 + offset;
             }
             else {
                 return d.parent.x + (d.x - d.parent.x) + settings.nodeWidth / 2;
@@ -48,14 +88,19 @@ export const drawLinkUpdate = (linkEnter, link, settings) => {
         })
             .attr("y", function (d) {
             // Position closer to child node (75% of the way)
+            const offset = getLabelOffset(settings.linkShape || "quadraticBeziers", settings.isHorizontal);
             if (settings.isHorizontal) {
                 return d.parent.x + (d.x - d.parent.x) + settings.nodeHeight / 2;
             }
             else {
-                return d.parent.y + (d.y - d.parent.y) - settings.nodeHeight / 2;
+                // For vertical, adjust y to center on the curve
+                return d.parent.y + (d.y - d.parent.y) - settings.nodeHeight / 2 + offset;
             }
         })
-            .html(function (d) {
+            .text("") // Clear existing content
+            .each(function (d) {
+            // Clear any existing tspans
+            select(this).selectAll("tspan").remove();
             // Render the label text - parent is the source, d is the child/target
             const parentNodeData = {
                 ...d.parent,
@@ -67,8 +112,26 @@ export const drawLinkUpdate = (linkEnter, link, settings) => {
                 data: d.data,
                 settings: settings,
             };
-            return settings.linkLabel.render(parentNodeData, childNodeData);
-        });
+            const result = settings.linkLabel.render(parentNodeData, childNodeData);
+            // Get the text element
+            const textElement = select(this);
+            // Check if result contains HTML/tspan markup
+            if (result.includes("<tspan") || result.includes("<strong") || result.includes("<i>")) {
+                // Parse HTML-like content and create tspan elements
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(`<root>${result}</root>`, "text/xml");
+                processLabelNode(xmlDoc.documentElement, textElement);
+            }
+            else {
+                // Plain text - just add it directly
+                textElement.text(result);
+            }
+        })
+            //@ts-ignore
+            .transition()
+            .delay(settings.duration) // Wait for link animation to finish
+            .duration(300) // Fade-in duration
+            .attr("opacity", 1); // Fade in to visible
     }
 };
 //# sourceMappingURL=link-update.js.map

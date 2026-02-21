@@ -173,7 +173,6 @@ var myTree = Treeviz.create({
     linkWidth: (node) => {
         return node.data.id * 2;
     },
-    linkShape: "curve",
     linkColor: () => `#B0BEC5`,
     linkLabel: {
         render: (_parent, _child) => {

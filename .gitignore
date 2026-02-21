@@ -11,6 +11,13 @@ node_modules
 dist-ssr
 *.local
 
+# Test coverage
+coverage/
+.nyc_output/
+
+# Test results
+test-results/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

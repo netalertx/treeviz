@@ -30,6 +30,13 @@ export interface ITreeConfig<T> {
   marginLeft: number;
   marginRight: number;
   secondaryAxisNodeSpacing: number;
+  linkLabel?: ILinkLabel<T>;
+}
+
+export interface ILinkLabel<T> {
+  render: (parent: NodeData<T>, child: NodeData<T>) => string;
+  color?: string;
+  fontSize?: number;
 }
 
 export interface ExtendedHierarchyPointNode extends HierarchyPointNode<{}> {

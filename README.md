@@ -9,13 +9,13 @@ This javascript module aims at providing an easy interface in order to represent
 
 ## Installation
 
-With npm : 
+With npm :
 
 ```Bash
 npm install treeviz
 ```
 
-and then you can use it with : 
+and then you can use it with :
 
 ```JavaScript
 import {Treeviz} from 'treeviz';
@@ -23,26 +23,60 @@ import {Treeviz} from 'treeviz';
 
 Or download this zip repository in the Github Release section and link the dist/treeviz.js file in your page directly : `<script src="./dist/index.js><script>`
 
-## Usage
+## Development
+
+
+```bash
+npm run dev
+```
+
 
 #### Vanilla JavaScript NEW
 
-To build .js budle
+To build .js bundles for vanilla JavaScript usage:
+
+```bash
+npm run build
+```
+
+This generates:
+- `dist/treeviz.js` - ES module format
+- `dist/treeviz.iife.js` - Vanilla JS bundle for `<script>` tag usage
+
+1. Link in your HTML
+
+```html
+<script src="dist/treeviz.iife.js"></script>
+```
+
+2. Use in your JavaScript
+
+```html
+<div id="tree" style="height:700px; width:900px"></div>
+
+<script>
+  var data = [
+    { id: 1, text_1: "Father", father: null },
+    { id: 2, text_1: "Child A", father: 1 },
+  ];
+
+  var myTree = Treeviz.create({
+    htmlId: "tree",
+    idKey: "id",
+    hasFlatData: true,
+    relationnalField: "father",
+  });
+
+  myTree.refresh(data);
+</script>
+```
+
+#### Alternative: esbuild
+
+If you prefer using esbuild directly:
 
 ```bash
 npx esbuild src/index.ts --bundle --outfile=dist/bundle.js --platform=browser --format=iife --global-name=Treeviz --keep-names
-```
-
-1. Download: 
-
-`/dist/bundle.js`
-`/dist/bundle.js.map`
-
-2. Link in your HTML 
-
-```html
-<script src="lib/treeviz/bundle.js"></script> 
-<script src="lib/treeviz/bundle.js.map"></script> 
 ```
 
 
@@ -132,6 +166,7 @@ The table below lists all the avalaible key that the config object can have
 | `linkColor`                | function                                      | (node: NodeData) => "#ffcc80" | Color of the link                                                                                                                                                                  |
 | `linkWidth`                | function                                      | (node: NodeData) => 10        | Width of the link                                                                                                                                                                  |
 | `linkShape`                | "quadraticBeziers" \| "orthogonal" \| "curve" | "quadraticBeziers"      | Shape of the link                                                                                                                                                                  |
+| `linkLabel`                | ILinkLabel<T>                                 | undefined               | Configuration for labels displayed on connection lines. Contains `render` function, `color`, and `fontSize` properties                                                             |
 | `renderNode`               | function                                      | (node: NodeData) => null      | HTML template for every node                                                                                                                                                       |
 | `isHorizontal`             | boolean                                       | true                    | Direction of the tree. If true, the tree expands from left to right. If false, it goes from top to bottom                                                                          |
 | `onNodeClick`              | function                                      | (node: NodeData) => null      | Function handling the event when someone click on it                                                                                                                               |
@@ -154,11 +189,74 @@ type NodeData {
 }
 `
 
+### Link Labels Configuration
+
+You can display labels on the connection lines between nodes using the `linkLabel` configuration:
+
+```js
+var myTree = Treeviz.create({
+  htmlId: "tree",
+  idKey: "id",
+  hasFlatData: true,
+  relationnalField: "father",
+  linkLabel: {
+    render: (parent, child) => {
+      // Return text or HTML to display on the connection line
+      return "is child";
+      // or with HTML:
+      // return "<tspan><strong>reports to</strong></tspan>";
+    },
+    color: "#455A64",      // Label text color (optional)
+    fontSize: 11           // Label font size in px (optional)
+  }
+});
+```
+
+The `render` function receives parent and child `NodeData` objects, allowing you to create dynamic labels based on node properties.
+
+## Testing
+
+The project uses [Vitest](https://vitest.dev/) for unit and integration testing with jsdom for DOM simulation and coverage reporting.
+
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests once
+npm run test:run
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Open Vitest UI dashboard (interactive)
+npm run test:ui
+```
+
+### Test Structure
+
+Tests are organized in `tests/` folder:
+
+- **`tests/unit/`** - Unit tests for individual functions and utilities
+  - `utils.test.ts` - Tests for `setNodeLocation()` function
+  - `core-utils.test.ts` - Tests for `getAreaSize()` and `RefreshQueue` class
+  - `node-ancestors.test.ts` - Tests for `getFirstDisplayedAncestor()` hierarchy traversal
+  - `prepare-data.test.ts` - Tests for data preparation and configuration validation
+
+- **`tests/integration/`** - Integration tests for API and configuration
+  - `treeviz-api.test.ts` - Tests for configuration validation, data variations, and layout configurations
+
+### Test Coverage
+
+Coverage reports are generated in the `coverage/` directory after running `npm run test:coverage`. The HTML report provides detailed coverage information for all source files.
+
 ## Contributing
 
 - Clone the repo.
 - Run `npm install`.
 - Run `npm run dev`, then you can edit the files in the `./src` folder and the `./example/index.html` file.
+- **Run `npm test` to verify your changes pass all tests** before submitting a pull request.
 - To publish (admin rights), run `npm run build && npm publish`.
 
 ## Credits

@@ -179,6 +179,13 @@ var myTree = Treeviz.create({
   },
   linkShape: "curve",
   linkColor: () => `#B0BEC5`,
+  linkLabel: {
+    render: (_parent, _child) => {
+      return "is child";
+    },
+    color: "#455A64",
+    fontSize: 11,
+  },
   onNodeClick: (node) => {
     console.log(node.data);
   },
@@ -214,3 +221,49 @@ doTasksButton?.addEventListener("click", function () {
   removeButton?.click();
   removeButton?.click();
 });
+
+// Horizontal layout example with link labels
+var horizontalTree = Treeviz.create({
+  data: data_1,
+  htmlId: "tree-horizontal",
+  idKey: "id",
+  hasFlatData: true,
+  relationnalField: "father",
+  nodeWidth: 120,
+  hasPan: true,
+  hasZoom: true,
+  nodeHeight: 80,
+  mainAxisNodeSpacing: 2,
+  isHorizontal: true,
+  renderNode: function renderNode(node) {
+    return (
+      "<div class='box' style='cursor:pointer;height:" +
+      node.settings.nodeHeight +
+      "px; width:" +
+      node.settings.nodeWidth +
+      "px;display:flex;flex-direction:column;justify-content:center;align-items:center;background-color:" +
+      node.data.color +
+      ";border-radius:5px;'><div><strong>" +
+      node.data.text_1 +
+      "</strong></div><div>is</div><div><i>" +
+      node.data.text_2 +
+      "</i></div></div>"
+    );
+  },
+  linkWidth: (node) => {
+    return node.data.id * 2;
+  },
+  linkShape: "curve",
+  linkColor: () => `#B0BEC5`,
+  linkLabel: {
+    render: (_parent, _child) => {
+      return "is child";
+    },
+    color: "#455A64",
+    fontSize: 11,
+  },
+  onNodeClick: (node) => {
+    console.log(node.data);
+  },
+});
+horizontalTree.refresh(data_1);

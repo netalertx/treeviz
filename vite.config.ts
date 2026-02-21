@@ -4,10 +4,12 @@ import dts from "vite-plugin-dts";
 
 export default defineConfig({
   plugins: [dts({ include: ["src"] })],
+  root: "./example",
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
-      formats: ["es"],
+      formats: ["es", "iife"],
+      name: "Treeviz",
     },
     rollupOptions: {
       input: {
@@ -15,8 +17,9 @@ export default defineConfig({
       },
     },
     copyPublicDir: false,
+    outDir: resolve(__dirname, "dist"),
   },
   server: {
-    open: "/example/index.html",
+    open: true,
   },
 });

@@ -96,7 +96,7 @@ export const drawLinkUpdate = <T>(
           settings: settings,
         };
         const result = settings.linkLabel!.render(parentNodeData, childNodeData);
-        
+
         // Set plain text label
         select(this).text(result);
       })

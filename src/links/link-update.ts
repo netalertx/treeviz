@@ -2,6 +2,7 @@ import { HierarchyPointNode } from "d3-hierarchy";
 import { Selection, select } from "d3-selection";
 import { ITreeConfig, NodeData } from "../typings";
 import { generateLinkLayout } from "./draw-links";
+import { getLinkCap, getLinkDashArray } from "./link-style";
 
 const getLabelOffset = (linkShape: string, isHorizontal: boolean) => {
   // For quadraticBeziers, the curve bulges outward, so we need to offset the label
@@ -34,7 +35,11 @@ export const drawLinkUpdate = <T>(
     })
     .attr("stroke", (d: any) => {
       return settings.linkColor(d);
-    });
+    })
+    .attr("stroke-dasharray", (d: any) =>
+      getLinkDashArray(settings.linkStyle?.(d), settings.linkWidth(d))
+    )
+    .attr("stroke-linecap", (d: any) => getLinkCap(settings.linkStyle?.(d)));
 
   // Add/update link labels if configured
   if (settings.linkLabel) {

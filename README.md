@@ -165,6 +165,7 @@ The table below lists all the avalaible key that the config object can have
 | `nodeHeight`               | number                                        | 100                     | Height of a node in px                                                                                                                                                             |
 | `linkColor`                | function                                      | (node: NodeData) => "#ffcc80" | Color of the link                                                                                                                                                                  |
 | `linkWidth`                | function                                      | (node: NodeData) => 10        | Width of the link                                                                                                                                                                  |
+| `linkStyle`                | function                                      | (node: NodeData) => "solid"   | Stroke pattern of the link. Return "solid", "dashed", "dotted", or "dashdot"                                                                                                       |
 | `linkShape`                | "quadraticBeziers" \| "orthogonal" \| "curve" | "quadraticBeziers"      | Shape of the link                                                                                                                                                                  |
 | `linkLabel`                | ILinkLabel<T>                                 | undefined               | Configuration for labels displayed on connection lines. Contains `render` function, `color`, and `fontSize` properties                                                             |
 | `renderNode`               | function                                      | (node: NodeData) => null      | HTML template for every node                                                                                                                                                       |
@@ -188,6 +189,24 @@ type NodeData {
   settings: // the settings object
 }
 `
+
+### Link Styling
+
+You can control the stroke pattern of the connection lines using `linkStyle`, a per-link callback like `linkColor`/`linkWidth`:
+
+```js
+var myTree = Treeviz.create({
+  htmlId: "tree",
+  idKey: "id",
+  hasFlatData: true,
+  relationnalField: "father",
+  linkStyle: (node) => {
+    // Return "solid", "dashed", "dotted", or "dashdot"
+    // Can vary per link based on node data:
+    return node.data.isOptional ? "dashed" : "solid";
+  },
+});
+```
 
 ### Link Labels Configuration
 

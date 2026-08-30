@@ -3,7 +3,10 @@ import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
 export default defineConfig({
-  plugins: [dts({ include: ["src"] })],
+  // dts' `root`/`include` resolve against Vite's global `root` by default; since that's
+  // "./example" below, pin dts' own root to the project root so `include: ["src"]` finds
+  // the real src/ dir instead of the nonexistent example/src.
+  plugins: [dts({ include: ["src"], root: __dirname })],
   root: "./example",
   build: {
     lib: {

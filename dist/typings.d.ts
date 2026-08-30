@@ -3,6 +3,7 @@ export type NodeData<T> = {
     data: T;
     settings: ITreeConfig<T>;
 } & ExtendedHierarchyPointNode;
+export type LinkStyle = "solid" | "dashed" | "dotted" | "dashdot";
 export interface ITreeConfig<T> {
     data: T[];
     htmlId: string;
@@ -16,6 +17,7 @@ export interface ITreeConfig<T> {
     renderNode: (node: NodeData<T>) => string | null;
     linkColor: (node: NodeData<T>) => string;
     linkWidth: (node: NodeData<T>) => number;
+    linkStyle?: (node: NodeData<T>) => LinkStyle;
     onNodeClick: (node: NodeData<T>) => void;
     onNodeMouseEnter: (node: NodeData<T>) => void;
     onNodeMouseLeave: (node: NodeData<T>) => void;
@@ -28,6 +30,12 @@ export interface ITreeConfig<T> {
     marginLeft: number;
     marginRight: number;
     secondaryAxisNodeSpacing: number;
+    linkLabel?: ILinkLabel<T>;
+}
+export interface ILinkLabel<T> {
+    render: (parent: NodeData<T>, child: NodeData<T>) => string;
+    color?: string;
+    fontSize?: number;
 }
 export interface ExtendedHierarchyPointNode extends HierarchyPointNode<{}> {
     x0?: number;

@@ -27,6 +27,7 @@ export function create(userSettings) {
         renderNode: () => "Node",
         linkColor: () => "#ffcc80",
         linkWidth: () => 10,
+        linkStyle: () => "solid",
         linkShape: "quadraticBeziers",
         isHorizontal: true,
         hasPan: false,

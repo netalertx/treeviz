@@ -10,15 +10,17 @@ describe('getAreaSize', () => {
   it('should return correct dimensions for valid container', () => {
     const container = document.createElement('div');
     container.id = 'test-container';
-    container.style.width = '800px';
-    container.style.height = '600px';
+    // jsdom doesn't run layout, so clientWidth/clientHeight never reflect
+    // CSS width/height; stub them directly instead.
+    Object.defineProperty(container, 'clientWidth', { value: 800, configurable: true });
+    Object.defineProperty(container, 'clientHeight', { value: 600, configurable: true });
     document.body.appendChild(container);
 
     const result = getAreaSize('test-container');
 
     expect(result).toEqual({
-      areaWidth: expect.any(Number),
-      areaHeight: expect.any(Number),
+      areaWidth: 800,
+      areaHeight: 600,
     });
   });
 
@@ -65,8 +67,13 @@ describe('getAreaSize', () => {
 
 describe('RefreshQueue', () => {
   beforeEach(() => {
-    // Reset queue state between tests by clearing any lingering timers
     vi.useFakeTimers();
+    // RefreshQueue keeps its queue/runner as static state shared across every
+    // test; a leftover interval from a previous test becomes a dead ID once
+    // useRealTimers() swaps the clock out, which silently blocks future
+    // add() calls. Reset it directly so each test starts from a clean queue.
+    (RefreshQueue as any).queue = [];
+    (RefreshQueue as any).runner = 0;
   });
 
   afterEach(() => {
@@ -100,17 +107,20 @@ describe('RefreshQueue', () => {
   });
 
   it('should delay callback execution by specified duration', () => {
+    // RefreshQueue runs the first callback of an idle queue immediately;
+    // only callbacks queued behind a running task are actually delayed.
+    // Prime the queue so it's busy before adding the callback under test.
+    RefreshQueue.add(50, () => {});
+
     const callback = vi.fn();
-    const duration = 300;
+    RefreshQueue.add(300, callback);
 
-    RefreshQueue.add(duration, callback);
-
-    // Before duration + extraDelay elapsed
-    vi.advanceTimersByTime(duration);
     expect(callback).not.toHaveBeenCalled();
 
-    // After duration + extraDelay (100ms default)
     vi.advanceTimersByTime(150);
+    expect(callback).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(100);
     expect(callback).toHaveBeenCalled();
   });
 

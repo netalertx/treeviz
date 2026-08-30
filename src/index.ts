@@ -33,6 +33,7 @@ export function create<T>(userSettings: Partial<ITreeConfig<T>>) {
     renderNode: () => "Node",
     linkColor: () => "#ffcc80",
     linkWidth: () => 10,
+    linkStyle: () => "solid",
     linkShape: "quadraticBeziers",
     isHorizontal: true,
     hasPan: false,

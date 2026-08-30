@@ -231,6 +231,9 @@ var horizontalTree = Treeviz.create({
   linkWidth: (node) => {
     return node.data.id * 2;
   },
+  linkStyle: (node) => {
+    return node.data.id % 2 === 0 ? "dashed" : "solid";
+  },
   linkShape: "curve",
   linkColor: () => `#B0BEC5`,
   linkLabel: {

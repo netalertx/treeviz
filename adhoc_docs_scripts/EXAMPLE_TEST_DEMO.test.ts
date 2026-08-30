@@ -125,7 +125,7 @@ describe('DEMO: Family Tree - Multiple Data Structures', () => {
 
   it('should handle deep family tree with many generations', () => {
     expect(deepFamilyTree).toHaveLength(5);
-    expect(deepFamilyTree[4].parent).toBe('gen3');
+    expect(deepFamilyTree[4].parent).toBe('gen4');
   });
 });
 

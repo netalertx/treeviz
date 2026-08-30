@@ -3,6 +3,7 @@ import { BaseType, Selection } from "d3-selection";
 import { ExtendedHierarchyPointNode, ITreeConfig } from "../typings";
 import { getFirstDisplayedAncestor } from "../utils";
 import { generateLinkLayout } from "./draw-links";
+import { getLinkCap, getLinkDashArray } from "./link-style";
 
 export const drawLinkEnter = <T>(
   link: Selection<BaseType, HierarchyPointNode<{}>, SVGGElement, {}>,
@@ -30,6 +31,10 @@ export const drawLinkEnter = <T>(
     .attr("stroke-width", (d: any) => 
       settings.linkWidth(d) // Pass the correct `d` object to linkWidth
     )
-    .attr("stroke", (d: any) => 
+    .attr("stroke", (d: any) =>
       settings.linkColor(d) // Pass the correct `d` object to linkColor
-    );
+    )
+    .attr("stroke-dasharray", (d: any) =>
+      getLinkDashArray(settings.linkStyle?.(d), settings.linkWidth(d))
+    )
+    .attr("stroke-linecap", (d: any) => getLinkCap(settings.linkStyle?.(d)));
